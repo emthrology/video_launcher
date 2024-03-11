@@ -5,12 +5,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //자주쓰는 설정을 위에 끌어놓기
-    final textStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 30.0,
-      fontWeight: FontWeight.w300
-    );
+
     return Scaffold(
         body: Container(
           width: MediaQuery.of(context).size.width,
@@ -21,21 +16,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               _Logo(),
               SizedBox(height: 30.0,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'VIDEO',
-                    style: textStyle
-                  ),
-                  Text(
-                    'PLAYER',
-                    style: textStyle.copyWith(
-                      fontWeight: FontWeight.w700
-                    )
-                  )
-                ],
-              )
+              _AppName()
             ],
           ),
         )
@@ -63,6 +44,34 @@ class _Logo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.asset(
         'asset/image/logo.png'
+    );
+  }
+}
+
+class _AppName extends StatelessWidget {
+  const _AppName({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = TextStyle(
+        color: Colors.white,
+        fontSize: 30.0,
+        fontWeight: FontWeight.w300
+    );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+            'VIDEO',
+            style: textStyle
+        ),
+        Text(
+            'PLAYER',
+            style: textStyle.copyWith(
+                fontWeight: FontWeight.w700
+            )
+        )
+      ],
     );
   }
 }
