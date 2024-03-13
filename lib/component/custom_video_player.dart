@@ -39,8 +39,117 @@ class _CsutomVideoPlayerState extends State<CsutomVideoPlayer> {
     if (vc == null) {
       return CircularProgressIndicator();
     }
-    return VideoPlayer(
-      vc!,
+    return AspectRatio(
+      aspectRatio: vc!.value.aspectRatio,
+      child: Stack(children: [
+        VideoPlayer(
+          vc!,
+        ),
+        _Controls(
+          onPlayPressed: onPlayPressed,
+          onRewindPressed: onRewindPressed,
+          onFFPressed: onFFPressed,
+          isPlaying: vc!.value.isPlaying,
+        ),
+        Positioned(
+          //absolute-like
+          right: 0,
+          child: IconButton(
+              onPressed: () {},
+              color: Colors.white,
+              iconSize: 30.0,
+              icon: Icon(
+                Icons.photo_camera_back,
+              )),
+        )
+      ]),
+    );
+  }
+
+  void onPlayPressed() {
+    //toggle play state
+    setState(() { //like watching
+      if(vc!.value.isPlaying) {
+        vc!.pause();
+      } else{
+        vc!.play();
+      }
+    });
+
+  }
+  void onRewindPressed() {
+    final jump = Duration(milliseconds: 3000);
+    final currentPosition = vc!.value.position;
+    final minPosition = Duration.zero;
+    Duration position;
+    if(currentPosition < jump) {
+      position = minPosition;
+    }else {
+      position = currentPosition - jump;
+    }
+    vc!.seekTo(position);
+  }
+  void onFFPressed() {
+    final jump = Duration(milliseconds: 3000);
+    final currentPosition = vc!.value.position;
+    final maxPosition = vc!.value.duration;
+    final timeLeft = maxPosition - currentPosition;
+    Duration position;
+    if(timeLeft < jump) {
+      position = maxPosition;
+    }else {
+      position = currentPosition + jump;
+    }
+    vc!.seekTo(position);
+  }
+}
+
+class _Controls extends StatelessWidget {
+  final VoidCallback onPlayPressed;
+  final VoidCallback onRewindPressed;
+  final VoidCallback onFFPressed;
+  final bool isPlaying;
+
+  const _Controls({
+    required this.onPlayPressed,
+    required this.onRewindPressed,
+    required this.onFFPressed,
+    required this.isPlaying,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black.withOpacity(0.5), //비디오 컨트롤 버튼 잘보이게
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          renderIconButton(
+            onPressed: onRewindPressed,
+            iconData: Icons.rotate_left,
+          ),
+          renderIconButton(
+            onPressed: onPlayPressed,
+            iconData: isPlaying ? Icons.pause : Icons.play_arrow,
+          ),
+          renderIconButton(
+            onPressed: onFFPressed,
+            iconData: Icons.rotate_right,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget renderIconButton(
+      {required VoidCallback onPressed, required IconData iconData}) {
+    return IconButton(
+      onPressed: onPressed,
+      iconSize: 30.0,
+      color: Colors.white,
+      icon: Icon(iconData),
     );
   }
 }
