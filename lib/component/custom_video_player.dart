@@ -4,18 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 
-class CsutomVideoPlayer extends StatefulWidget {
+class CustomVideoPlayer extends StatefulWidget {
   final XFile video;
+  final VoidCallback onNewVideoPressed;
 
-  const CsutomVideoPlayer({required this.video, super.key});
+  const CustomVideoPlayer({required this.onNewVideoPressed, required this.video, super.key});
 
   @override
-  State<CsutomVideoPlayer> createState() => _CsutomVideoPlayerState();
+  State<CustomVideoPlayer> createState() => _CustomVideoPlayerState();
 }
 
-class _CsutomVideoPlayerState extends State<CsutomVideoPlayer> {
+class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
   VideoPlayerController? vc;
   Duration currentPosition = Duration();
+  bool showControls = false;
 
   @override
   void initState() {
@@ -24,8 +26,19 @@ class _CsutomVideoPlayerState extends State<CsutomVideoPlayer> {
     initializeController();
   }
 
+  @override
+  void didUpdateWidget(covariant CustomVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if(oldWidget.video.path != widget.video.path) {
+      initializeController();
+    }
+
+  }
+
   // initState는 async 못해서 따로 뺌
   initializeController() async {
+    currentPosition = Duration();
     vc = VideoPlayerController.file(
         File(widget.video.path) //XFile 형식을 dart.io.file 형식으로 convert
         );
@@ -49,25 +62,34 @@ class _CsutomVideoPlayerState extends State<CsutomVideoPlayer> {
     }
     return AspectRatio(
       aspectRatio: vc!.value.aspectRatio,
-      child: Stack(children: [
-        VideoPlayer(
-          vc!,
-        ),
-        _Controls(
-          onPlayPressed: onPlayPressed,
-          onRewindPressed: onRewindPressed,
-          onFFPressed: onFFPressed,
-          isPlaying: vc!.value.isPlaying,
-        ),
-        _NewVideo(
-          onPressed: onNewVideoPressed,
-        ),
-        _SliderBottom(
-          currentPosition: currentPosition,
-          maxPosition: vc!.value.duration,
-          onSliderChanged: onSliderChanaged,
-        ),
-      ]),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            showControls = !showControls;
+          });
+        },
+        child: Stack(children: [
+          VideoPlayer(
+            vc!,
+          ),
+          if(showControls)
+            _Controls(
+              onPlayPressed: onPlayPressed,
+              onRewindPressed: onRewindPressed,
+              onFFPressed: onFFPressed,
+              isPlaying: vc!.value.isPlaying,
+            ),
+          if(showControls)
+            _NewVideo(
+              onPressed: widget.onNewVideoPressed,
+            ),
+          _SliderBottom(
+            currentPosition: currentPosition,
+            maxPosition: vc!.value.duration,
+            onSliderChanged: onSliderChanaged,
+          ),
+        ]),
+      ),
     );
   }
 
@@ -80,7 +102,7 @@ class _CsutomVideoPlayerState extends State<CsutomVideoPlayer> {
   }
 
 
-  void onNewVideoPressed() {}
+
 
   void onPlayPressed() {
     //toggle play state
@@ -140,8 +162,8 @@ class _Controls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.black.withOpacity(0.5), //비디오 컨트롤 버튼 잘보이게
+      height: MediaQuery.of(context).size.height,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           renderIconButton(
